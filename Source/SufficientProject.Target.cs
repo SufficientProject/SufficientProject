@@ -8,7 +8,6 @@ public class SufficientProjectTarget : TargetRules
 	public SufficientProjectTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-
 		ExtraModuleNames.AddRange( new string[] { "SufficientProject" } );
 	}
 }

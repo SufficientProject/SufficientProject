@@ -6,15 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "SufficientProjectGameModeBase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SUFFICIENTPROJECT_API ASufficientProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
-	
+
 };

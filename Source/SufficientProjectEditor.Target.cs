@@ -8,7 +8,6 @@ public class SufficientProjectEditorTarget : TargetRules
 	public SufficientProjectEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-
 		ExtraModuleNames.AddRange( new string[] { "SufficientProject" } );
 	}
 }
