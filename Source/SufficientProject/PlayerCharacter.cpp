@@ -10,11 +10,15 @@
 #include "GameFramework/Controller.h"
 #include "Camera/CameraComponent.h"
 
+// Define collision
+#define COLLISION_ENEMY ECollisionChannel::ECC_GameTraceChannel1
+#define COLLISION_PLAYER ECollisionChannel::ECC_GameTraceChannel2
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	//PrimaryActorTick.bCanEverTick = true;
+	// PrimaryActorTick.bCanEverTick = true;
 
 	// Use only Yaw in controll of the character
 	bUseControllerRotationPitch = false;
@@ -24,6 +28,14 @@ APlayerCharacter::APlayerCharacter()
 	// Set the size of our collision capsule
 	GetCapsuleComponent()->SetCapsuleHalfHeight(96.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(40.0f);
+
+	GetCapsuleComponent()->BodyInstance.SetCollisionProfileName("player");
+	GetCapsuleComponent()->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+
+	GetCapsuleComponent()->SetCollisionObjectType(COLLISION_PLAYER);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_ENEMY, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PLAYER, ECollisionResponse::ECR_Block);
 
 	// Create a camera bom attached to the root
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -195,4 +207,22 @@ void APlayerCharacter::SetTurnedRight(bool value)
 bool APlayerCharacter::GetTurnedRight()
 {
 	return turnedRight;
+}
+
+float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// Call the base class - this will tell us how much damage to apply  
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.f)
+	{
+		ChangeCurrentHealth(-ActualDamage);
+
+		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
+		if (currentHealth <= 0.f)
+		{
+			SetLifeSpan(0.001f);
+		}
+	}
+
+	return ActualDamage;
 }

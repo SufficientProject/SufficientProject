@@ -84,7 +84,11 @@ public:
 
 private:
 	bool turnedRight;
+
 public:
 	void SetTurnedRight(bool value);
 	bool GetTurnedRight();
+
+protected:
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 };

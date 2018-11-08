@@ -6,33 +6,11 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 
-/*
+// Define collision
+#define COLLISION_ENEMY ECollisionChannel::ECC_GameTraceChannel1
+#define COLLISION_PLAYER ECollisionChannel::ECC_GameTraceChannel2
+
 // Sets default values
-ABullet::ABullet()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	speed = 600.0f;
-}
-
-// Called when the game starts or when spawned
-void ABullet::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
-// Called every frame
-void ABullet::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	FVector loc = GetActorLocation();
-	loc += (DeltaTime * speed) * GetTransform().GetUnitAxis(EAxis::X);
-	SetActorLocation(loc);
-}*/
-
 ABullet::ABullet()
 {
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
@@ -53,8 +31,8 @@ ABullet::ABullet()
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 600.f;
-	ProjectileMovement->MaxSpeed = 600.f;
+	ProjectileMovement->InitialSpeed = 1500.f;
+	ProjectileMovement->MaxSpeed = 1500.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->Bounciness = 0.0f;
@@ -67,7 +45,10 @@ void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	if (GetInstigator() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		CollisionComp->SetCollisionResponseToChannel(COLLISION_PLAYER, ECollisionResponse::ECR_Ignore);
+	else
+		CollisionComp->SetCollisionResponseToChannel(COLLISION_ENEMY, ECollisionResponse::ECR_Ignore);
 }
 
 void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -82,7 +63,10 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	
 	if (GetInstigator() != OtherActor)
 	{
-		//...//
+		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+		FDamageEvent DamageEvent(ValidDamageTypeClass);
+		APlayerController* PlayerController = Cast<APlayerController>(GetInstigatorController());
+		OtherActor->TakeDamage(damage, DamageEvent, PlayerController, this);
 		Destroy();
 
 		UE_LOG(LogTemp, Warning, TEXT("hit!"));
