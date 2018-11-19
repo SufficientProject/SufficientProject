@@ -9,13 +9,14 @@
 // Define collision
 #define COLLISION_ENEMY ECollisionChannel::ECC_GameTraceChannel1
 #define COLLISION_PLAYER ECollisionChannel::ECC_GameTraceChannel2
+#define COLLISION_PROJECTILE ECollisionChannel::ECC_GameTraceChannel3
 
 // Sets default values
 ABullet::ABullet()
 {
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->InitSphereRadius(8.0f);
-	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
+	CollisionComp->BodyInstance.SetCollisionProfileName("projectile");
 
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
@@ -24,6 +25,9 @@ ABullet::ABullet()
 
 	CollisionComp->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Block);
+	CollisionComp->SetCollisionResponseToChannel(COLLISION_PLAYER, ECollisionResponse::ECR_Block);
+	CollisionComp->SetCollisionResponseToChannel(COLLISION_ENEMY, ECollisionResponse::ECR_Block);
+	CollisionComp->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECollisionResponse::ECR_Ignore);
 
 	CollisionComp->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 
@@ -58,7 +62,7 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 10.0f, GetActorLocation());
 		Destroy();
 
-		UE_LOG(LogTemp, Warning, TEXT("hit!"));
+		//UE_LOG(LogTemp, Warning, TEXT("hit!"));
 	}
 	
 	if (GetInstigator() != OtherActor)
@@ -69,6 +73,6 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		OtherActor->TakeDamage(damage, DamageEvent, PlayerController, this);
 		Destroy();
 
-		UE_LOG(LogTemp, Warning, TEXT("hit!"));
+		//UE_LOG(LogTemp, Warning, TEXT("hit!"));
 	}
 }
