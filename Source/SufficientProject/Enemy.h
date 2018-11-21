@@ -43,6 +43,7 @@ protected:
 	void UpdateCharacter();
 
 	void Fire();
+	void FireSpecial();
 
 public:
 	// Sets default values for this character's properties
@@ -50,33 +51,36 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
-		int currentHealth;
+		float currentHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
-		int maxHealth;
+		float maxHealth;
 
 public:
 	UFUNCTION()
-		int GetCurrentHealth();
+		float GetCurrentHealth();
 
 	UFUNCTION()
-		void SetCurrentHealth(int health);
+		void SetCurrentHealth(float health);
 
 	UFUNCTION()
-		void ChangeCurrentHealth(int value);
+		void ChangeCurrentHealth(float value);
 
 	UFUNCTION()
-		int GetMaxHealth();
+		float GetMaxHealth();
 
 	UFUNCTION()
-		void SetMaxHealth(int health);
+		void SetMaxHealth(float health);
 
 private:
 	bool turnedRight;
 	APlayerCharacter* Player;
+	
 	bool test = false;
+	bool specialAttack = false;
 
 	FTimerHandle timer;
+	FTimerHandle timerHandle2;
 
 public:
 	void SetTurnedRight(bool value);

@@ -46,6 +46,8 @@ protected:
 
 	void Fire();
 
+	void Suicide();
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -61,26 +63,26 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
-		int currentHealth;
+		float currentHealth;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
-		int maxHealth;
+		float maxHealth;
 
 public:
 	UFUNCTION()
-		int GetCurrentHealth();
+		float GetCurrentHealth();
 
 	UFUNCTION()
-		void SetCurrentHealth(int health);
+		void SetCurrentHealth(float health);
 
 	UFUNCTION()
-		void ChangeCurrentHealth(int value);
+		void ChangeCurrentHealth(float value);
 
 	UFUNCTION()
-		int GetMaxHealth();
+		float GetMaxHealth();
 
 	UFUNCTION()
-		void SetMaxHealth(int health);
+		void SetMaxHealth(float health);
 
 private:
 	bool turnedRight;

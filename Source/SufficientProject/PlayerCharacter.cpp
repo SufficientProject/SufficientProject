@@ -48,8 +48,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create an orthograpic camera (no perspective) and attach it to the cameraboom
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
-	CameraComponent->OrthoWidth = 2048.0f;
+	CameraComponent->ProjectionMode = ECameraProjectionMode::Perspective;
+	CameraComponent->FieldOfView = 90.f;
+	//CameraComponent->OrthoWidth = 2048.0f;
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Prevent all automatic rotation behavior on the camera, character and camera component
@@ -144,15 +145,15 @@ void APlayerCharacter::UpdateCharacter()
 	}
 }
 
-int APlayerCharacter::GetCurrentHealth()
+float APlayerCharacter::GetCurrentHealth()
 {
 	return currentHealth;
 }
 
-void APlayerCharacter::SetCurrentHealth(int health)
+void APlayerCharacter::SetCurrentHealth(float health)
 {
-	if (health < 0)
-		currentHealth = 0;
+	if (health <= 0.f)
+		currentHealth = 0.f;
 	else if (health > GetMaxHealth())
 		currentHealth = GetMaxHealth();
 	else
@@ -160,19 +161,20 @@ void APlayerCharacter::SetCurrentHealth(int health)
 
 }
 
-void APlayerCharacter::ChangeCurrentHealth(int value)
+void APlayerCharacter::ChangeCurrentHealth(float value)
 {
 	SetCurrentHealth(GetCurrentHealth() + value);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCurrentHealth());
 }
 
-int APlayerCharacter::GetMaxHealth()
+float APlayerCharacter::GetMaxHealth()
 {
 	return maxHealth;
 }
 
-void APlayerCharacter::SetMaxHealth(int health)
+void APlayerCharacter::SetMaxHealth(float health)
 {
-	if (health > 0)
+	if (health > 0.f)
 		maxHealth = health;
 }
 
@@ -194,7 +196,7 @@ void APlayerCharacter::Fire()
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 
-		FVector SpawnLocation = loc + rot.RotateVector(FVector(50, 0, 0));
+		FVector SpawnLocation = loc + rot.RotateVector(FVector(70, 0, 0));
 		GetWorld()->SpawnActor<ABullet>(bullet, SpawnLocation, rot, SpawnParams);
 	}
 }
@@ -220,6 +222,8 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (currentHealth <= 0.f)
 		{
+			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
+			ClearComponentOverlaps();
 			SetLifeSpan(0.001f);
 		}
 	}

@@ -19,9 +19,10 @@ ACombatCameraTrigger::ACombatCameraTrigger()
 	RootComponent = CollisionBox;
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
-	CameraComponent->OrthoWidth = 2048.0f;
-	CameraComponent->SetRelativeLocation(FVector(-50.0f, 700.0f, -10.0f));
+	CameraComponent->ProjectionMode = ECameraProjectionMode::Perspective;
+	CameraComponent->FieldOfView = 90.f;
+	//CameraComponent->OrthoWidth = 2048.0f;
+	CameraComponent->SetRelativeLocation(FVector(-50.0f, 1024.0f, -10.0f));
 	CameraComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	CameraComponent->SetupAttachment(RootComponent);
 
@@ -41,7 +42,6 @@ void ACombatCameraTrigger::BeginPlay()
 void ACombatCameraTrigger::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ACombatCameraTrigger::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
