@@ -48,9 +48,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create an orthograpic camera (no perspective) and attach it to the cameraboom
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->ProjectionMode = ECameraProjectionMode::Perspective;
-	CameraComponent->FieldOfView = 90.f;
-	//CameraComponent->OrthoWidth = 2048.0f;
+	CameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
+	//CameraComponent->FieldOfView = 90.f;
+	CameraComponent->OrthoWidth = 2048.0f;
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Prevent all automatic rotation behavior on the camera, character and camera component
