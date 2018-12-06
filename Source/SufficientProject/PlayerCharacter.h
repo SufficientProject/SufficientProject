@@ -36,6 +36,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
 		TSubclassOf<AActor> bullet;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
+		TSubclassOf<AActor> bulletLow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
+		TSubclassOf<AActor> bulletMed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
+		TSubclassOf<AActor> bulletHigh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
+		TSubclassOf<AActor> bulletHighest;
+
 	/* Called to choose correct animation to play based on movement state */
 	void UpdateAnimation();
 
@@ -44,7 +56,16 @@ protected:
 
 	void UpdateCharacter();
 
+	void FireLow();
+	void FireMed();
+	void FireHigh();
+
+	void FireHighest();
+	void FireDefault();
+
 	void Fire();
+
+	void Squeak();
 
 	void Suicide();
 
@@ -68,6 +89,33 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float maxHealth;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
+		float currentStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
+		float maxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* Squeaking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* Dying;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* ShotDefault;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase*ShotLow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* ShotMed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* ShotHigh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* ShotHighest;
+
 public:
 	UFUNCTION()
 		float GetCurrentHealth();
@@ -83,6 +131,21 @@ public:
 
 	UFUNCTION()
 		void SetMaxHealth(float health);
+
+	UFUNCTION()
+		float GetCurrentStamina();
+
+	UFUNCTION()
+		void SetCurrentStamina(float stamina);
+
+	UFUNCTION()
+		void ChangeCurrentStamina(float value);
+
+	UFUNCTION()
+		float GetMaxStamina();
+
+	UFUNCTION()
+		void SetMaxStamina(float stamina);
 
 private:
 	bool turnedRight;

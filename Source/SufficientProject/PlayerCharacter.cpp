@@ -78,6 +78,9 @@ APlayerCharacter::APlayerCharacter()
 	currentHealth = 10;
 	maxHealth = 10;
 
+	currentStamina = 100;
+	maxStamina = 100;
+
 	turnedRight = true;
 }
 
@@ -97,7 +100,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::Fire);
+	PlayerInputComponent->BindAction("FireLow", IE_Pressed, this, &APlayerCharacter::FireLow);
+	PlayerInputComponent->BindAction("FireMed", IE_Pressed, this, &APlayerCharacter::FireMed);
+	PlayerInputComponent->BindAction("FireHigh", IE_Pressed, this, &APlayerCharacter::FireHigh);
+	PlayerInputComponent->BindAction("FireHighest", IE_Pressed, this, &APlayerCharacter::FireHighest);
+
+	PlayerInputComponent->BindAction("FireDefault", IE_Pressed, this, &APlayerCharacter::FireDefault);
+
+	PlayerInputComponent->BindAction("Squeak", IE_Pressed, this, &APlayerCharacter::Squeak);
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 }
@@ -178,6 +188,87 @@ void APlayerCharacter::SetMaxHealth(float health)
 		maxHealth = health;
 }
 
+float APlayerCharacter::GetCurrentStamina()
+{
+	return currentStamina;
+}
+
+void APlayerCharacter::SetCurrentStamina(float stamina)
+{
+	if (currentStamina <= 0.f)
+		currentStamina = 0.f;
+	else if (stamina > GetMaxStamina())
+		currentStamina = GetMaxStamina();
+	else
+		currentStamina = stamina;
+}
+
+void APlayerCharacter::ChangeCurrentStamina(float value)
+{
+	SetCurrentStamina(GetCurrentStamina() + value);
+}
+
+float APlayerCharacter::GetMaxStamina()
+{
+	return maxStamina;
+}
+
+void APlayerCharacter::SetMaxStamina(float stamina)
+{
+	maxStamina = stamina;
+}
+
+void APlayerCharacter::FireLow()
+{
+	if (currentStamina >= 5)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ShotLow, this->GetActorLocation());
+
+		ChangeCurrentStamina(-5);
+		Fire();
+	}
+}
+
+void APlayerCharacter::FireMed()
+{
+	if (currentStamina >= 5)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ShotMed, this->GetActorLocation());
+
+		ChangeCurrentStamina(-5);
+		Fire();
+	}
+}
+
+void APlayerCharacter::FireHigh()
+{
+	if (currentStamina >= 5)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ShotHigh, this->GetActorLocation());
+		ChangeCurrentStamina(-5);
+		Fire();
+	}
+}
+
+void APlayerCharacter::FireHighest()
+{
+	if (currentStamina >= 10)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ShotHighest, this->GetActorLocation());
+
+		ChangeCurrentStamina(-10);
+		Fire();
+	}
+}
+
+
+void APlayerCharacter::FireDefault()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, ShotDefault, this->GetActorLocation());
+
+	Fire();
+}
+
 void APlayerCharacter::Fire()
 {
 	if (bullet)
@@ -201,6 +292,11 @@ void APlayerCharacter::Fire()
 	}
 }
 
+void APlayerCharacter::Squeak()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, Squeaking, this->GetActorLocation());
+}
+
 void APlayerCharacter::SetTurnedRight(bool value)
 {
 	turnedRight = value;
@@ -222,6 +318,8 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (currentHealth <= 0.f)
 		{
+			UGameplayStatics::PlaySoundAtLocation(this, Dying, GetOwner()->GetActorLocation());
+
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
 			ClearComponentOverlaps();
 			SetLifeSpan(0.001f);
