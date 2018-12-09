@@ -106,9 +106,13 @@ void APlayerCharacter::UpdateAnimation()
 {
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
-
 	// Check if moving
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	UPaperFlipbook* DesiredAnimation;
+	if 
+		(IsJumping()) DesiredAnimation = JumpingAnimation;
+	else
+		(PlayerSpeedSqr > 0.0f) ? DesiredAnimation = RunningAnimation : DesiredAnimation = IdleAnimation;
+
 	if (GetSprite()->GetFlipbook() != DesiredAnimation)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
@@ -209,6 +213,16 @@ void APlayerCharacter::SetTurnedRight(bool value)
 bool APlayerCharacter::GetTurnedRight()
 {
 	return turnedRight;
+}
+
+bool APlayerCharacter::IsJumping()
+{
+	const FVector PlayerVelocity = GetVelocity();
+	
+	if(PlayerVelocity.Z != 0 )
+		return true;
+
+	return false;
 }
 
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

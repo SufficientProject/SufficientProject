@@ -22,6 +22,10 @@ class SUFFICIENTPROJECT_API APlayerCharacter : public APaperCharacter
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+	// The animation to play while in jumping state
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+		class UPaperFlipbook* JumpingAnimation;
+
 	// The animation to play while in running state
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 		class UPaperFlipbook* RunningAnimation;
@@ -90,6 +94,7 @@ private:
 public:
 	void SetTurnedRight(bool value);
 	bool GetTurnedRight();
+	bool IsJumping();
 
 protected:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
