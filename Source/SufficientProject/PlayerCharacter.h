@@ -86,6 +86,7 @@ public:
 
 private:
 	bool turnedRight;
+	void DestroyOverlapped();
 
 public:
 	void SetTurnedRight(bool value);

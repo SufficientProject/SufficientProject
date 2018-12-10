@@ -2,6 +2,7 @@
 
 #include "PlayerCharacter.h"
 #include "Bullet.h"
+#include "CombatCameraTrigger.h"
 #include "PaperFlipbookComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -223,10 +224,19 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		if (currentHealth <= 0.f)
 		{
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
-			ClearComponentOverlaps();
+			DestroyOverlapped();
 			SetLifeSpan(0.001f);
 		}
 	}
 
 	return ActualDamage;
+}
+
+void APlayerCharacter::DestroyOverlapped()
+{
+	TArray<AActor*> Overlapped;
+	GetOverlappingActors(Overlapped, TSubclassOf<ACombatCameraTrigger>());
+	for (int i = 0; i < Overlapped.Num(); i++)
+		Overlapped[i]->Destroy();
+	ClearComponentOverlaps();
 }
