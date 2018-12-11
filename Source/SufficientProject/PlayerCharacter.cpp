@@ -82,6 +82,9 @@ APlayerCharacter::APlayerCharacter()
 	maxStamina = 100;
 
 	turnedRight = true;
+
+	staminaReplenishing = false;
+	lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 }
 
 // Called every frame
@@ -122,6 +125,11 @@ void APlayerCharacter::UpdateAnimation()
 	if (GetSprite()->GetFlipbook() != DesiredAnimation)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
+	}
+
+	if (CheckStamina())
+	{
+		
 	}
 }
 
@@ -225,6 +233,13 @@ void APlayerCharacter::FireLow()
 		UGameplayStatics::PlaySoundAtLocation(this, ShotLow, this->GetActorLocation());
 
 		ChangeCurrentStamina(-5);
+
+		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+		if (staminaReplenishing)
+		{
+			StoptReplenishingStamina();
+		}
+
 		Fire();
 	}
 }
@@ -236,6 +251,13 @@ void APlayerCharacter::FireMed()
 		UGameplayStatics::PlaySoundAtLocation(this, ShotMed, this->GetActorLocation());
 
 		ChangeCurrentStamina(-5);
+
+		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+		if (staminaReplenishing)
+		{
+			StoptReplenishingStamina();
+		}
+
 		Fire();
 	}
 }
@@ -246,6 +268,13 @@ void APlayerCharacter::FireHigh()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ShotHigh, this->GetActorLocation());
 		ChangeCurrentStamina(-5);
+
+		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+		if (staminaReplenishing)
+		{
+			StoptReplenishingStamina();
+		}
+
 		Fire();
 	}
 }
@@ -255,8 +284,14 @@ void APlayerCharacter::FireHighest()
 	if (currentStamina >= 10)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ShotHighest, this->GetActorLocation());
-
 		ChangeCurrentStamina(-10);
+
+		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+		if (staminaReplenishing)
+		{
+			StoptReplenishingStamina();
+		}
+
 		Fire();
 	}
 }
@@ -307,24 +342,68 @@ bool APlayerCharacter::GetTurnedRight()
 	return turnedRight;
 }
 
+bool APlayerCharacter::CheckStamina()
+{
+	if (currentStamina < maxStamina)
+	{
+		if (staminaReplenishing)
+		{
+			return true;
+		}
+
+		if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) - lastStaminaShot > 3000)
+		{
+			StartReplenishingStamina();
+			return true;
+		}
+	}
+
+	if (staminaReplenishing)
+	{
+		StoptReplenishingStamina();
+	}
+	
+
+	return false;
+}
+
+void APlayerCharacter::StartReplenishingStamina()
+{
+	staminaReplenishing = true;
+	GetWorld()->GetTimerManager().SetTimer(staminaTimer, this, &APlayerCharacter::ReplenishStaminaPortion, 1, true);
+}
+
+void APlayerCharacter::StoptReplenishingStamina()
+{
+	staminaReplenishing = false;
+	GetWorld()->GetTimerManager().ClearTimer(staminaTimer);
+}
+
+void APlayerCharacter::ReplenishStaminaPortion()
+{
+	ChangeCurrentStamina(1);
+}
+
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Call the base class - this will tell us how much damage to apply  
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f)
 	{
+		UGameplayStatics::PlaySoundAtLocation(this, DamageTaken, GetOwner()->GetActorLocation());
+
 		ChangeCurrentHealth(-ActualDamage);
 
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (currentHealth <= 0.f)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, Dying, GetOwner()->GetActorLocation());
-
+		
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
 			ClearComponentOverlaps();
 			SetLifeSpan(0.001f);
 		}
 	}
-
+	
 	return ActualDamage;
 }

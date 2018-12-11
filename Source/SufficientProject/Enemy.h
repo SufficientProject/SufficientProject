@@ -14,6 +14,7 @@
 UCLASS()
 class SUFFICIENTPROJECT_API AEnemy : public APaperCharacter
 {
+	
 	GENERATED_BODY()
 	
 	// Called every frame
@@ -56,6 +57,51 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float maxHealth;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntBegin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntCocky1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntCocky2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntAngry1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntAngry2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntDying;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* TauntDamageTaken;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* AttackNormal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* AttackSpecial1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* AttackSpecial2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* AttackSpecial3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* MusicSlow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* MusicMedium;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* MusicFast;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		UAudioComponent* BackgroundMusicAudioComp;
+
 public:
 	UFUNCTION()
 		float GetCurrentHealth();
@@ -79,6 +125,8 @@ private:
 	bool test = false;
 	bool specialAttack = false;
 
+	
+
 	FTimerHandle timer;
 	FTimerHandle timerHandle2;
 
@@ -92,7 +140,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float bpmSpecial = 0;
 
-	void StartCombat();
+		void StartSlow();
+		void StartMedium();
+		void StartFast();
 
 protected:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

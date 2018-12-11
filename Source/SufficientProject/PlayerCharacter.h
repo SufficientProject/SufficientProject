@@ -99,6 +99,9 @@ protected:
 		class USoundBase* Squeaking;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+		class USoundBase* DamageTaken;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		class USoundBase* Dying;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
@@ -148,11 +151,24 @@ public:
 		void SetMaxStamina(float stamina);
 
 private:
+	FTimerHandle staminaTimer;
+
+	float lastStaminaShot;
+
+	bool staminaReplenishing;
 	bool turnedRight;
+	
 
 public:
 	void SetTurnedRight(bool value);
 	bool GetTurnedRight();
+
+	bool CheckStamina();
+
+	void StartReplenishingStamina();
+	void StoptReplenishingStamina();
+
+	void ReplenishStaminaPortion();
 
 protected:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

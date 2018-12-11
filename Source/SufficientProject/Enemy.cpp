@@ -56,6 +56,13 @@ AEnemy::AEnemy()
 	maxHealth = 10;
 
 	turnedRight = true;
+
+	BackgroundMusicAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("BackgroundMusicComponent"));
+
+	if (BackgroundMusicAudioComp)
+	{
+		BackgroundMusicAudioComp->bAutoActivate = false;
+	}
 }
 
 // Called every frame
@@ -163,6 +170,8 @@ void AEnemy::Fire()
 {
 	if (bullet)
 	{
+		UGameplayStatics::PlaySoundAtLocation(this, AttackNormal, GetActorLocation());
+
 		Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
 		if (Player)
@@ -209,6 +218,21 @@ void AEnemy::FireSpecial()
 
 			if (specialAttack)
 			{
+				int randomVal = FMath::RandRange(0, 1);
+
+				if (randomVal == 0)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial1, GetActorLocation());
+				}
+				else if (randomVal == 1)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial2, GetActorLocation());
+				}
+				else
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial3, GetActorLocation());
+				}
+
 				FVector loc = GetCapsuleComponent()->RelativeLocation;
 				FRotator rot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Player->GetActorLocation());
 				
@@ -242,29 +266,110 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 {
 	// Call the base class - this will tell us how much damage to apply  
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
 	if (ActualDamage > 0.f)
 	{
+		UGameplayStatics::PlaySoundAtLocation(this, OnHitReaction, GetActorLocation());
+
 		ChangeCurrentHealth(-ActualDamage);
 
-		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (currentHealth <= 0.f)
 		{
+			BackgroundMusicAudioComp->Stop();
+
 			SetLifeSpan(0.001f);
 		}
+
+		int randmax = 1000000;
+		int random = FMath::RandRange(0, randmax);
+
+		if (GetCurrentHealth() >= 70)
+		{
+			StartMedium();
+		}
+		else if (GetCurrentHealth() >= 40)
+		{
+			StartFast();
+		}			
+		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
+		
 	}
 
 	if (!test)
-		StartCombat();
+	{
+		StartSlow();
+	}
 	test = true;
 
 	return ActualDamage;
 }
 
-void AEnemy::StartCombat()
+void AEnemy::StartSlow()
 {
+	BackgroundMusicAudioComp->SetSound(MusicSlow);
+
+	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+	BackgroundMusicAudioComp->Play();
+
+	UGameplayStatics::PlaySoundAtLocation(this, TauntBegin, GetActorLocation());
+
 	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
 	const float QuarterNoteTime2 = 60.0f / FMath::Max(1.0f, bpmSpecial);
 
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &AEnemy::Fire, QuarterNoteTime, true);
 	GetWorld()->GetTimerManager().SetTimer(timerHandle2, this, &AEnemy::FireSpecial, QuarterNoteTime2, true);
 }
+
+void AEnemy::StartMedium()
+{
+	int randomVal = FMath::RandRange(0, 1);
+
+	BackgroundMusicAudioComp->SetSound(MusicMedium);
+
+	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+	BackgroundMusicAudioComp->Play();
+	
+	if (randomVal == 1)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, TauntCocky1, GetActorLocation());
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, TauntCocky2, GetActorLocation());
+	}
+
+	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
+	const float QuarterNoteTime2 = 60.0f / FMath::Max(1.0f, bpmSpecial);
+
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &AEnemy::Fire, QuarterNoteTime, true);
+	GetWorld()->GetTimerManager().SetTimer(timerHandle2, this, &AEnemy::FireSpecial, QuarterNoteTime2, true);
+}
+
+void AEnemy::StartFast()
+{
+	int randomVal = FMath::RandRange(0, 1);
+
+	BackgroundMusicAudioComp->SetSound(MusicFast);
+
+	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+	BackgroundMusicAudioComp->Play();
+
+	if (randomVal == 1)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, TauntAngry1, GetActorLocation());
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, TauntAngry2, GetActorLocation());
+	}
+
+	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
+	const float QuarterNoteTime2 = 60.0f / FMath::Max(1.0f, bpmSpecial);
+
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &AEnemy::Fire, QuarterNoteTime, true);
+	GetWorld()->GetTimerManager().SetTimer(timerHandle2, this, &AEnemy::FireSpecial, QuarterNoteTime2, true);
+}
+
