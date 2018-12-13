@@ -126,11 +126,6 @@ void APlayerCharacter::UpdateAnimation()
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
 	}
-
-	if (CheckStamina())
-	{
-		
-	}
 }
 
 void APlayerCharacter::MoveRight(float value)
@@ -160,6 +155,11 @@ void APlayerCharacter::UpdateCharacter()
 			Controller->SetControlRotation(FRotator(0.0f, 0.0f, 0.0f));
 			SetTurnedRight(true);
 		}
+	}
+
+	if (CheckStamina())
+	{
+
 	}
 }
 
@@ -230,7 +230,11 @@ void APlayerCharacter::FireLow()
 {
 	if (currentStamina >= 5)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ShotLow, this->GetActorLocation());
+		if (ShotLow)
+		{
+			UGameplayStatics::PlaySound2D(this, ShotLow);
+		}
+		
 
 		ChangeCurrentStamina(-5);
 
@@ -248,8 +252,11 @@ void APlayerCharacter::FireMed()
 {
 	if (currentStamina >= 5)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ShotMed, this->GetActorLocation());
-
+		if (ShotMed)
+		{
+			UGameplayStatics::PlaySound2D(this, ShotMed);
+		}
+		
 		ChangeCurrentStamina(-5);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -266,7 +273,11 @@ void APlayerCharacter::FireHigh()
 {
 	if (currentStamina >= 5)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ShotHigh, this->GetActorLocation());
+		if (ShotHigh)
+		{
+			UGameplayStatics::PlaySound2D(this, ShotHigh);
+		}
+		
 		ChangeCurrentStamina(-5);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -283,7 +294,11 @@ void APlayerCharacter::FireHighest()
 {
 	if (currentStamina >= 10)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ShotHighest, this->GetActorLocation());
+		if (ShotHighest)
+		{
+			UGameplayStatics::PlaySound2D(this, ShotHighest);
+		}
+		
 		ChangeCurrentStamina(-10);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -299,7 +314,10 @@ void APlayerCharacter::FireHighest()
 
 void APlayerCharacter::FireDefault()
 {
-	UGameplayStatics::PlaySoundAtLocation(this, ShotDefault, this->GetActorLocation());
+	if (ShotDefault)
+	{
+		UGameplayStatics::PlaySound2D(this, ShotDefault);
+	}
 
 	Fire();
 }
@@ -329,7 +347,11 @@ void APlayerCharacter::Fire()
 
 void APlayerCharacter::Squeak()
 {
-	UGameplayStatics::PlaySoundAtLocation(this, Squeaking, this->GetActorLocation());
+	if (Squeaking)
+	{
+		UGameplayStatics::PlaySound2D(this, Squeaking);
+	}
+	
 }
 
 void APlayerCharacter::SetTurnedRight(bool value)
@@ -351,7 +373,7 @@ bool APlayerCharacter::CheckStamina()
 			return true;
 		}
 
-		if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) - lastStaminaShot > 3000)
+		if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) - lastStaminaShot > 3)
 		{
 			StartReplenishingStamina();
 			return true;
@@ -390,15 +412,21 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, DamageTaken, GetOwner()->GetActorLocation());
+		if (DamageTaken)
+		{
+			UGameplayStatics::PlaySound2D(this, DamageTaken);
+		}
+		
 
 		ChangeCurrentHealth(-ActualDamage);
 
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (currentHealth <= 0.f)
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, Dying, GetOwner()->GetActorLocation());
-		
+			if (Dying)
+			{
+				UGameplayStatics::PlaySound2D(this, Dying);
+			}
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
 			ClearComponentOverlaps();
 			SetLifeSpan(0.001f);

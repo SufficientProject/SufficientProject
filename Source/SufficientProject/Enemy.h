@@ -124,8 +124,7 @@ private:
 	
 	bool test = false;
 	bool specialAttack = false;
-
-	
+	bool inCombat = false;
 
 	FTimerHandle timer;
 	FTimerHandle timerHandle2;

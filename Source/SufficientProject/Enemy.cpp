@@ -56,6 +56,7 @@ AEnemy::AEnemy()
 	maxHealth = 10;
 
 	turnedRight = true;
+	inCombat = false;
 
 	BackgroundMusicAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("BackgroundMusicComponent"));
 
@@ -69,6 +70,14 @@ AEnemy::AEnemy()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (inCombat)
+	{
+		if ( !(BackgroundMusicAudioComp->IsPlaying()) )
+		{
+			BackgroundMusicAudioComp->Play(0.0f);
+		}
+	}
 
 	UpdateCharacter();
 	//Fire();
@@ -222,15 +231,15 @@ void AEnemy::FireSpecial()
 
 				if (randomVal == 0)
 				{
-					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial1, GetActorLocation());
+					UGameplayStatics::PlaySound2D(this, AttackSpecial1);
 				}
 				else if (randomVal == 1)
 				{
-					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial2, GetActorLocation());
+					UGameplayStatics::PlaySound2D(this, AttackSpecial2);
 				}
 				else
 				{
-					UGameplayStatics::PlaySoundAtLocation(this, AttackSpecial3, GetActorLocation());
+					UGameplayStatics::PlaySound2D(this, AttackSpecial3);
 				}
 
 				FVector loc = GetCapsuleComponent()->RelativeLocation;
@@ -269,8 +278,11 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 
 	if (ActualDamage > 0.f)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, OnHitReaction, GetActorLocation());
-
+		if (TauntDamageTaken)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntDamageTaken);
+		}
+		
 		ChangeCurrentHealth(-ActualDamage);
 
 		if (currentHealth <= 0.f)
@@ -292,7 +304,6 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 			StartFast();
 		}			
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
-		
 	}
 
 	if (!test)
@@ -306,38 +317,80 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 
 void AEnemy::StartSlow()
 {
-	BackgroundMusicAudioComp->SetSound(MusicSlow);
-
-	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
-
-	BackgroundMusicAudioComp->Play();
-
-	UGameplayStatics::PlaySoundAtLocation(this, TauntBegin, GetActorLocation());
 
 	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
 	const float QuarterNoteTime2 = 60.0f / FMath::Max(1.0f, bpmSpecial);
 
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &AEnemy::Fire, QuarterNoteTime, true);
 	GetWorld()->GetTimerManager().SetTimer(timerHandle2, this, &AEnemy::FireSpecial, QuarterNoteTime2, true);
+
+	if (!inCombat)
+	{
+		inCombat = true;
+
+		if (TauntBegin)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntBegin);
+
+			if (MusicSlow)
+			{
+				BackgroundMusicAudioComp->SetSound(MusicSlow);
+
+				BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+			}
+		}
+		return;
+	}
+
+	if (!(BackgroundMusicAudioComp->IsPlaying()))
+	{
+		BackgroundMusicAudioComp->Stop();
+	}
+
+	if (MusicSlow)
+	{
+		BackgroundMusicAudioComp->SetSound(MusicSlow);
+
+		BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+		BackgroundMusicAudioComp->Play();
+	}
+	
 }
 
 void AEnemy::StartMedium()
 {
+	inCombat = true;
+
 	int randomVal = FMath::RandRange(0, 1);
-
-	BackgroundMusicAudioComp->SetSound(MusicMedium);
-
-	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
-
-	BackgroundMusicAudioComp->Play();
 	
 	if (randomVal == 1)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, TauntCocky1, GetActorLocation());
+		if (TauntCocky1)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntCocky1);
+		}	
 	}
 	else
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, TauntCocky2, GetActorLocation());
+		if (TauntCocky2)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntCocky2);
+		}	
+	}
+
+	if (!(BackgroundMusicAudioComp->IsPlaying()))
+	{
+		BackgroundMusicAudioComp->Stop();
+	}
+
+	if (MusicMedium)
+	{
+		BackgroundMusicAudioComp->SetSound(MusicMedium);
+
+		BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+		BackgroundMusicAudioComp->Play();
 	}
 
 	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
@@ -349,21 +402,40 @@ void AEnemy::StartMedium()
 
 void AEnemy::StartFast()
 {
+
+	inCombat = true;
+
 	int randomVal = FMath::RandRange(0, 1);
-
-	BackgroundMusicAudioComp->SetSound(MusicFast);
-
-	BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
-
-	BackgroundMusicAudioComp->Play();
 
 	if (randomVal == 1)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, TauntAngry1, GetActorLocation());
+		if (TauntAngry1)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntAngry1);
+		}
+		
 	}
 	else
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, TauntAngry2, GetActorLocation());
+		if (TauntAngry2)
+		{
+			UGameplayStatics::PlaySound2D(this, TauntAngry2);
+		}
+		
+	}
+
+	if (!(BackgroundMusicAudioComp->IsPlaying()))
+	{
+		BackgroundMusicAudioComp->Stop();
+	}
+
+	if (MusicFast)
+	{
+		BackgroundMusicAudioComp->SetSound(MusicFast);
+
+		BackgroundMusicAudioComp->bIgnoreForFlushing = 1;
+
+		BackgroundMusicAudioComp->Play();
 	}
 
 	const float QuarterNoteTime = 60.0f / FMath::Max(1.0f, bpm);
