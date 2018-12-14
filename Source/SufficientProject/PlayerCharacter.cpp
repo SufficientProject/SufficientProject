@@ -388,6 +388,8 @@ bool APlayerCharacter::CheckStamina()
 	{
 		StoptReplenishingStamina();
 	}
+
+	return false;
 }
 
 bool APlayerCharacter::IsJumping()
