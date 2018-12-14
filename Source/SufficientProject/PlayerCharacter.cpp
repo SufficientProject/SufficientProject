@@ -119,9 +119,13 @@ void APlayerCharacter::UpdateAnimation()
 {
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
-
 	// Check if moving
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	UPaperFlipbook* DesiredAnimation;
+	if
+		(IsJumping()) DesiredAnimation = JumpingAnimation;
+	else
+		(PlayerSpeedSqr > 0.0f) ? DesiredAnimation = RunningAnimation : DesiredAnimation = IdleAnimation;
+
 	if (GetSprite()->GetFlipbook() != DesiredAnimation)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
@@ -234,7 +238,7 @@ void APlayerCharacter::FireLow()
 		{
 			UGameplayStatics::PlaySound2D(this, ShotLow);
 		}
-		
+
 
 		ChangeCurrentStamina(-5);
 
@@ -256,7 +260,7 @@ void APlayerCharacter::FireMed()
 		{
 			UGameplayStatics::PlaySound2D(this, ShotMed);
 		}
-		
+
 		ChangeCurrentStamina(-5);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -277,7 +281,7 @@ void APlayerCharacter::FireHigh()
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHigh);
 		}
-		
+
 		ChangeCurrentStamina(-5);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -298,7 +302,7 @@ void APlayerCharacter::FireHighest()
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHighest);
 		}
-		
+
 		ChangeCurrentStamina(-10);
 
 		lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -333,7 +337,7 @@ void APlayerCharacter::Fire()
 			rot = FRotator(0.0f, 0.0f, 0.0f);
 		else
 			rot = FRotator(0.0f, 180.0f, 0.0f);
-		
+
 		FActorSpawnParameters SpawnParams;
 
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -351,7 +355,7 @@ void APlayerCharacter::Squeak()
 	{
 		UGameplayStatics::PlaySound2D(this, Squeaking);
 	}
-	
+
 }
 
 void APlayerCharacter::SetTurnedRight(bool value)
@@ -384,7 +388,14 @@ bool APlayerCharacter::CheckStamina()
 	{
 		StoptReplenishingStamina();
 	}
-	
+}
+
+bool APlayerCharacter::IsJumping()
+{
+	const FVector PlayerVelocity = GetVelocity();
+
+	if(PlayerVelocity.Z != 0 )
+		return true;
 
 	return false;
 }
@@ -408,7 +419,7 @@ void APlayerCharacter::ReplenishStaminaPortion()
 
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// Call the base class - this will tell us how much damage to apply  
+	// Call the base class - this will tell us how much damage to apply
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f)
 	{
@@ -416,11 +427,11 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		{
 			UGameplayStatics::PlaySound2D(this, DamageTaken);
 		}
-		
+
 
 		ChangeCurrentHealth(-ActualDamage);
 
-		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
+		// If the damage depletes our health set our lifespan to zero - which will destroy the actor
 		if (currentHealth <= 0.f)
 		{
 			if (Dying)
@@ -432,6 +443,6 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 			SetLifeSpan(0.001f);
 		}
 	}
-	
+
 	return ActualDamage;
 }

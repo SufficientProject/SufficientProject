@@ -11,4 +11,8 @@ class SUFFICIENTPROJECT_API ASufficientProjectGameModeBase : public AGameModeBas
 {
 	GENERATED_BODY()
 
+public:
+
+	ASufficientProjectGameModeBase();
+
 };
