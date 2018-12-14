@@ -11,7 +11,7 @@ UCLASS()
 class SUFFICIENTPROJECT_API APlayerCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* CameraComponent;
 
@@ -89,7 +89,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float currentHealth;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float maxHealth;
 
@@ -161,7 +161,8 @@ private:
 
 	bool staminaReplenishing;
 	bool turnedRight;
-	
+
+	void DestroyOverlapped();
 
 public:
 	void SetTurnedRight(bool value);

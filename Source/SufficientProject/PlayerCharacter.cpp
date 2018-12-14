@@ -2,6 +2,7 @@
 
 #include "PlayerCharacter.h"
 #include "Bullet.h"
+#include "CombatCameraTrigger.h"
 #include "PaperFlipbookComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -48,9 +49,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create an orthograpic camera (no perspective) and attach it to the cameraboom
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->ProjectionMode = ECameraProjectionMode::Perspective;
-	CameraComponent->FieldOfView = 90.f;
-	//CameraComponent->OrthoWidth = 2048.0f;
+	CameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
+	//CameraComponent->FieldOfView = 90.f;
+	CameraComponent->OrthoWidth = 2048.0f;
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Prevent all automatic rotation behavior on the camera, character and camera component
@@ -441,10 +442,19 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 				UGameplayStatics::PlaySound2D(this, Dying);
 			}
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
-			ClearComponentOverlaps();
+			DestroyOverlapped();
 			SetLifeSpan(0.001f);
 		}
 	}
 
 	return ActualDamage;
+}
+
+void APlayerCharacter::DestroyOverlapped()
+{
+	TArray<AActor*> Overlapped;
+	GetOverlappingActors(Overlapped, TSubclassOf<ACombatCameraTrigger>());
+	for (int i = 0; i < Overlapped.Num(); i++)
+		Overlapped[i]->Destroy();
+	ClearComponentOverlaps();
 }
