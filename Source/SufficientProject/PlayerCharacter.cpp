@@ -62,7 +62,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// Configure character movement
 	GetCharacterMovement()->GravityScale = 2.0f;
-	GetCharacterMovement()->AirControl = 0.10f;
+	GetCharacterMovement()->AirControl = 0.50f;
 	GetCharacterMovement()->JumpZVelocity = 1000.0f;
 	GetCharacterMovement()->GroundFriction = 10.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
@@ -111,7 +111,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("FireHigh", IE_Pressed, this, &APlayerCharacter::FireHigh);
 	PlayerInputComponent->BindAction("FireHighest", IE_Pressed, this, &APlayerCharacter::FireHighest);
 
-	PlayerInputComponent->BindAction("FireDefault", IE_Pressed, this, &APlayerCharacter::FireDefault);
+	//PlayerInputComponent->BindAction("FireDefault", IE_Pressed, this, &APlayerCharacter::FireDefault);
 
 	PlayerInputComponent->BindAction("Squeak", IE_Pressed, this, &APlayerCharacter::Squeak);
 
@@ -271,7 +271,7 @@ void APlayerCharacter::FireLow()
 			StoptReplenishingStamina();
 		}
 
-		Fire();
+		Fire(bulletLow);
 	}
 }
 
@@ -292,7 +292,7 @@ void APlayerCharacter::FireMed()
 			StoptReplenishingStamina();
 		}
 
-		Fire();
+		Fire(bulletMed);
 	}
 }
 
@@ -313,7 +313,7 @@ void APlayerCharacter::FireHigh()
 			StoptReplenishingStamina();
 		}
 
-		Fire();
+		Fire(bulletHigh);
 	}
 }
 
@@ -334,7 +334,7 @@ void APlayerCharacter::FireHighest()
 			StoptReplenishingStamina();
 		}
 
-		Fire();
+		Fire(bulletHighest);
 	}
 }
 
@@ -346,10 +346,10 @@ void APlayerCharacter::FireDefault()
 		UGameplayStatics::PlaySound2D(this, ShotDefault);
 	}
 
-	Fire();
+	Fire(bullet);
 }
 
-void APlayerCharacter::Fire()
+void APlayerCharacter::Fire(TSubclassOf<AActor> b)
 {
 	if (bullet)
 	{
@@ -368,7 +368,7 @@ void APlayerCharacter::Fire()
 		SpawnParams.Instigator = Instigator;
 
 		FVector SpawnLocation = loc + rot.RotateVector(FVector(70, 0, 0));
-		GetWorld()->SpawnActor<ABullet>(bullet, SpawnLocation, rot, SpawnParams);
+		GetWorld()->SpawnActor<ABullet>(b, SpawnLocation, rot, SpawnParams);
 	}
 }
 
@@ -467,9 +467,11 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 				UGameplayStatics::PlaySound2D(this, Dying);
 			}
 
-			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
-			DestroyOverlapped();
-			SetLifeSpan(0.001f);
+			Death();
+
+			//UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
+			//DestroyOverlapped();
+			//SetLifeSpan(0.001f);
 		}
 	}
 
@@ -483,4 +485,9 @@ void APlayerCharacter::DestroyOverlapped()
 	for (int i = 0; i < Overlapped.Num(); i++)
 		Overlapped[i]->Destroy();
 	ClearComponentOverlaps();
+}
+
+void APlayerCharacter::Death_Implementation()
+{
+	
 }

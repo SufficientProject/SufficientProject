@@ -67,7 +67,7 @@ protected:
 	void FireHighest();
 	void FireDefault();
 
-	void Fire();
+	void Fire(TSubclassOf<AActor> b);
 
 	void Squeak();
 
@@ -193,6 +193,9 @@ public:
 	void StoptReplenishingStamina();
 
 	void ReplenishStaminaPortion();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void Death();
 
 protected:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

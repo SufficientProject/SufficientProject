@@ -121,10 +121,8 @@ public:
 private:
 	bool turnedRight;
 	APlayerCharacter* Player;
-	
-	bool test = false;
+
 	bool specialAttack = false;
-	bool inCombat = false;
 
 	FTimerHandle timer;
 	FTimerHandle timerHandle2;
@@ -139,8 +137,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float bpmSpecial = 0;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool inCombat = false;
+
+	UFUNCTION(BlueprintCallable)
 		void StartSlow();
+
+	UFUNCTION(BlueprintCallable)
 		void StartMedium();
+
+	UFUNCTION(BlueprintCallable)
 		void StartFast();
 
 protected:

@@ -306,12 +306,6 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 	}
 
-	if (!test)
-	{
-		StartSlow();
-	}
-	test = true;
-
 	return ActualDamage;
 }
 
