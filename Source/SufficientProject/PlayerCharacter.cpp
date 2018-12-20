@@ -81,6 +81,8 @@ APlayerCharacter::APlayerCharacter()
 
 	currentStamina = 100;
 	maxStamina = 100;
+	staminaRegenerationRate = 0.1;
+	staminaRegenerationValue = 5;
 
 	turnedRight = true;
 
@@ -231,6 +233,27 @@ void APlayerCharacter::SetMaxStamina(float stamina)
 	maxStamina = stamina;
 }
 
+void APlayerCharacter::SetStaminaRegenerationValue(float regeneval)
+{
+	staminaRegenerationValue = regeneval;
+}
+
+
+float APlayerCharacter::GetStaminaRegenerationValue()
+{
+	return staminaRegenerationValue;
+}
+
+void APlayerCharacter::SetStaminaRegenerationRate(float regeneratio)
+{
+	staminaRegenerationRate = regeneratio;
+}
+
+float APlayerCharacter::GetStaminaRegenerationRate()
+{
+	return staminaRegenerationRate;
+}
+
 void APlayerCharacter::FireLow()
 {
 	if (currentStamina >= 5)
@@ -239,7 +262,6 @@ void APlayerCharacter::FireLow()
 		{
 			UGameplayStatics::PlaySound2D(this, ShotLow);
 		}
-
 
 		ChangeCurrentStamina(-5);
 
@@ -356,7 +378,6 @@ void APlayerCharacter::Squeak()
 	{
 		UGameplayStatics::PlaySound2D(this, Squeaking);
 	}
-
 }
 
 void APlayerCharacter::SetTurnedRight(bool value)
@@ -406,7 +427,7 @@ bool APlayerCharacter::IsJumping()
 void APlayerCharacter::StartReplenishingStamina()
 {
 	staminaReplenishing = true;
-	GetWorld()->GetTimerManager().SetTimer(staminaTimer, this, &APlayerCharacter::ReplenishStaminaPortion, 1, true);
+	GetWorld()->GetTimerManager().SetTimer(staminaTimer, this, &APlayerCharacter::ReplenishStaminaPortion, staminaRegenerationRate, true);
 }
 
 void APlayerCharacter::StoptReplenishingStamina()
@@ -417,7 +438,12 @@ void APlayerCharacter::StoptReplenishingStamina()
 
 void APlayerCharacter::ReplenishStaminaPortion()
 {
-	ChangeCurrentStamina(1);
+	if (currentStamina <= 0)
+	{
+		currentStamina = staminaRegenerationValue;
+	}
+
+	ChangeCurrentStamina(staminaRegenerationValue);
 }
 
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -431,7 +457,6 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 			UGameplayStatics::PlaySound2D(this, DamageTaken);
 		}
 
-
 		ChangeCurrentHealth(-ActualDamage);
 
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor
@@ -441,6 +466,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 			{
 				UGameplayStatics::PlaySound2D(this, Dying);
 			}
+
 			UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(this, 2.0f, VTBlend_Linear, 0.0f, false);
 			DestroyOverlapped();
 			SetLifeSpan(0.001f);

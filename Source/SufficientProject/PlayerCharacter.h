@@ -99,6 +99,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
 		float maxStamina;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
+		float staminaRegenerationValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
+		float staminaRegenerationRate; 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		class USoundBase* Squeaking;
 
@@ -112,7 +118,7 @@ protected:
 		class USoundBase* ShotDefault;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
-		class USoundBase*ShotLow;
+		class USoundBase* ShotLow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		class USoundBase* ShotMed;
@@ -153,6 +159,18 @@ public:
 
 	UFUNCTION()
 		void SetMaxStamina(float stamina);
+
+	UFUNCTION()
+		void SetStaminaRegenerationValue(float stamina);
+
+	UFUNCTION()
+		float GetStaminaRegenerationValue();
+
+	UFUNCTION()
+		void SetStaminaRegenerationRate(float stamina);
+
+	UFUNCTION()
+		float GetStaminaRegenerationRate();
 
 private:
 	FTimerHandle staminaTimer;
