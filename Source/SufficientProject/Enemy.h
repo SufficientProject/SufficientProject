@@ -32,6 +32,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 		class UPaperFlipbook* CombatAnimation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+		class UPaperFlipbook* DamageAnimation;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Bullet)
 		TSubclassOf<AActor> bullet;
 
@@ -126,6 +129,17 @@ private:
 
 	FTimerHandle timer;
 	FTimerHandle timerHandle2;
+	
+	FTimerHandle animTimer;
+
+
+	bool isTakingDamage = false;
+	bool isShooting = false;
+	
+	bool validator = false;
+
+	void setIsTakingDamage();
+	void setIsShooting();
 
 public:
 	void SetTurnedRight(bool value);
@@ -148,6 +162,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void StartFast();
+
+	UPROPERTY(BlueprintReadWrite)
+		bool canShoot;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void Death();
 
 protected:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

@@ -124,8 +124,8 @@ void APlayerCharacter::UpdateAnimation()
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
 	// Check if moving
 	UPaperFlipbook* DesiredAnimation;
-	if
-		(IsJumping()) DesiredAnimation = JumpingAnimation;
+	if (IsJumping())
+			DesiredAnimation = JumpingAnimation;
 	else
 		(PlayerSpeedSqr > 0.0f) ? DesiredAnimation = RunningAnimation : DesiredAnimation = IdleAnimation;
 

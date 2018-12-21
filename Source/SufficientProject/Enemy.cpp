@@ -57,6 +57,7 @@ AEnemy::AEnemy()
 
 	turnedRight = true;
 	inCombat = false;
+	canShoot = true;
 
 	BackgroundMusicAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("BackgroundMusicComponent"));
 
@@ -80,16 +81,36 @@ void AEnemy::Tick(float DeltaTime)
 	}
 
 	UpdateCharacter();
-	//Fire();
 }
 
 void AEnemy::UpdateAnimation()
 {
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
+	UPaperFlipbook* DesiredAnimation;
+	float updateTime = 1.0f / 15.0f;
 
-	// Check if moving
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	if (isTakingDamage)
+	{
+		DesiredAnimation = DamageAnimation;
+		if (validator == false)
+		{
+			GetWorld()->GetTimerManager().SetTimer(animTimer, this, &AEnemy::setIsTakingDamage, updateTime, false);
+			validator = true;
+		}
+	}
+	else if (isShooting)
+	{
+		DesiredAnimation = CombatAnimation;
+		if (validator == false)
+		{
+			GetWorld()->GetTimerManager().SetTimer(animTimer, this, &AEnemy::setIsShooting, 1.f, false);
+			validator = true;
+		}
+	}
+	else
+		DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+
 	if (GetSprite()->GetFlipbook() != DesiredAnimation)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
@@ -177,74 +198,19 @@ void AEnemy::SetMaxHealth(float health)
 
 void AEnemy::Fire()
 {
-	if (bullet)
+	if (canShoot)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, AttackNormal, GetActorLocation());
-
-		Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-		if (Player)
+		if (bullet)
 		{
-			FVector loc = GetCapsuleComponent()->RelativeLocation;
-			FRotator rot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Player->GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(this, AttackNormal, GetActorLocation());
 
-			FActorSpawnParameters SpawnParams;
+			Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = Instigator;
-
-			FVector SpawnLocation = loc + rot.RotateVector(FVector(70, 0, 0));
-			GetWorld()->SpawnActor<ABullet>(bullet, SpawnLocation, rot, SpawnParams);
-		}
-	}
-}
-
-void AEnemy::FireSpecial()
-{
-	if (bullet)
-	{
-		Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-		if (Player)
-		{
-			int randmax = 1000000;
-			int random = FMath::RandRange(0, randmax);
-
-			if (GetCurrentHealth() >= 70)
+			if (Player)
 			{
-				if (random > randmax * 0.9)
-					specialAttack = true;
-			}
-			else if (GetCurrentHealth() >= 40)
-			{
-				if (random > randmax * 0.75)
-					specialAttack = true;
-			}
-			else if (GetCurrentHealth() > 0)
-				if (random > randmax * 0.5)
-					specialAttack = true;
-
-			if (specialAttack)
-			{
-				int randomVal = FMath::RandRange(0, 1);
-
-				if (randomVal == 0)
-				{
-					UGameplayStatics::PlaySound2D(this, AttackSpecial1);
-				}
-				else if (randomVal == 1)
-				{
-					UGameplayStatics::PlaySound2D(this, AttackSpecial2);
-				}
-				else
-				{
-					UGameplayStatics::PlaySound2D(this, AttackSpecial3);
-				}
-
 				FVector loc = GetCapsuleComponent()->RelativeLocation;
 				FRotator rot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Player->GetActorLocation());
-				
+
 				FActorSpawnParameters SpawnParams;
 
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -253,8 +219,73 @@ void AEnemy::FireSpecial()
 
 				FVector SpawnLocation = loc + rot.RotateVector(FVector(70, 0, 0));
 				GetWorld()->SpawnActor<ABullet>(bullet, SpawnLocation, rot, SpawnParams);
+			}
 
-				specialAttack = false;
+			isShooting = true;
+		}
+	}
+}
+
+void AEnemy::FireSpecial()
+{
+	if (canShoot)
+	{
+		if (bullet)
+		{
+			Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+			if (Player)
+			{
+				int randmax = 1000000;
+				int random = FMath::RandRange(0, randmax);
+
+				if (GetCurrentHealth() >= 70)
+				{
+					if (random > randmax * 0.9)
+						specialAttack = true;
+				}
+				else if (GetCurrentHealth() >= 40)
+				{
+					if (random > randmax * 0.75)
+						specialAttack = true;
+				}
+				else if (GetCurrentHealth() > 0)
+					if (random > randmax * 0.5)
+						specialAttack = true;
+
+				if (specialAttack)
+				{
+					int randomVal = FMath::RandRange(0, 1);
+
+					if (randomVal == 0)
+					{
+						UGameplayStatics::PlaySound2D(this, AttackSpecial1);
+					}
+					else if (randomVal == 1)
+					{
+						UGameplayStatics::PlaySound2D(this, AttackSpecial2);
+					}
+					else
+					{
+						UGameplayStatics::PlaySound2D(this, AttackSpecial3);
+					}
+
+					FVector loc = GetCapsuleComponent()->RelativeLocation;
+					FRotator rot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Player->GetActorLocation());
+
+					FActorSpawnParameters SpawnParams;
+
+					SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+					SpawnParams.Owner = this;
+					SpawnParams.Instigator = Instigator;
+
+					FVector SpawnLocation = loc + rot.RotateVector(FVector(70, 0, 0));
+					GetWorld()->SpawnActor<ABullet>(bullet, SpawnLocation, rot, SpawnParams);
+
+					specialAttack = false;
+
+					isShooting = true;
+				}
 			}
 		}
 	}
@@ -289,7 +320,7 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 		{
 			BackgroundMusicAudioComp->Stop();
 
-			SetLifeSpan(0.001f);
+			Death();
 		}
 
 		int randmax = 1000000;
@@ -305,6 +336,8 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 		}			
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 	}
+
+	isTakingDamage = true;
 
 	return ActualDamage;
 }
@@ -439,3 +472,21 @@ void AEnemy::StartFast()
 	GetWorld()->GetTimerManager().SetTimer(timerHandle2, this, &AEnemy::FireSpecial, QuarterNoteTime2, true);
 }
 
+void AEnemy::setIsTakingDamage()
+{
+	isTakingDamage = false;
+	validator = false;
+	GetWorld()->GetTimerManager().PauseTimer(animTimer);
+}
+
+void AEnemy::setIsShooting()
+{
+	isShooting = false;
+	validator = false;
+	GetWorld()->GetTimerManager().ClearTimer(animTimer);
+}
+
+void AEnemy::Death_Implementation()
+{
+	
+}
