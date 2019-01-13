@@ -49,7 +49,7 @@ class SoundCombo
 
 					if (pos == comboSize)
 					{
-						return comboEffect
+						return comboEffect;
 					}
 
 				}
@@ -66,31 +66,6 @@ class SoundCombo
 		{
 			comboEffect = ef;
 		}
-};
-
-class SoundComboObserver
-{
-	size_t comboCount, delayTime, possibleSequences;
-
-	SoundCombo *comboList;
-
-	void reset();
-
-public:
-
-	SoundComboObserver();
-	SoundComboObserver(size_t, size_t);
-
-	~SoundComboObserver();
-
-	sound_combo_effect check();
-
-	size_t getComboCount();
-	size_t getDelayTime();
-
-	void setDelayTime(size_t);
-
-
 };
 
 // How this should work?
