@@ -89,16 +89,16 @@ APlayerCharacter::APlayerCharacter()
 	staminaReplenishing = false;
 	lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
-	for (int i = 0; i < genericComboCount; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		sound_shot *combo = new sound_shot[5];
 
-		for (int j = 0; j < comboSize; j++)
+		for (int j = 0; j < 5; j++)
 		{
 			combo[i] = genericCombos[i][j];
 		}
 
-		comboList[i] = new SoundCombo(comboSize, combo, sound_combo_effect::HEAL);
+		comboList[i] = new SoundCombo(5, combo, sound_combo_effect::HEAL);
 	}
 
 	
@@ -497,7 +497,7 @@ void APlayerCharacter::checkCombo(sound_shot st)
 		}
 	}
 
-	if (shotsFired > comboSize)
+	if (shotsFired > 5)
 	{
 		resetComboCheck();
 	}
@@ -528,7 +528,11 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor
 		if (currentHealth <= 0.f)
 		{
-			delete [] comboList;
+			for (int i = 0; i < comboCount; i++)
+			{
+				delete comboList[i];
+			}
+
 			if (Dying)
 			{
 				UGameplayStatics::PlaySound2D(this, Dying);

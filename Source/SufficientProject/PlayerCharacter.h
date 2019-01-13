@@ -177,6 +177,21 @@ public:
 		float GetStaminaRegenerationRate();
 
 private:
+
+	sound_shot genericCombos[5][5] =
+	{
+		{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::HIGHEST, sound_shot::HIGH},
+
+		{sound_shot::LOW, sound_shot::HIGH, sound_shot::LOW, sound_shot::HIGH, sound_shot::HIGHEST},
+
+		{sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST, sound_shot::LOW},
+
+		{sound_shot::LOW, sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST},
+
+		{sound_shot::HIGHEST, sound_shot::LOW, sound_shot::LOW, sound_shot::MED, sound_shot::HIGH}
+
+	};
+
 	const static size_t comboCount = 5;
 
 	size_t shotsFired;

@@ -4,22 +4,6 @@ enum class sound_shot : int { LOW, MED, HIGH, HIGHEST };
 
 enum class sound_combo_effect : int { FAILED, GOOD, NONE, DMG, HEAL };
 
-const size_t comboSize = 5, genericComboCount = 5;
-
-sound_shot genericCombos[genericComboCount][comboSize] =
-{
-	{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::HIGHEST, sound_shot::HIGH},
-
-	{sound_shot::LOW, sound_shot::HIGH, sound_shot::LOW, sound_shot::HIGH, sound_shot::HIGHEST},
-
-	{sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST, sound_shot::LOW},
-
-	{sound_shot::LOW, sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST},
-
-	{sound_shot::HIGHEST, sound_shot::LOW, sound_shot::LOW, sound_shot::MED, sound_shot::HIGH}
-
-};
-
 class SoundCombo
 {
 	private:
