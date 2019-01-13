@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Engine.h"
 #include "PaperCharacter.h"
+#include "SoundCombo.h"
 #include "PlayerCharacter.generated.h"
+
 
 UCLASS()
 class SUFFICIENTPROJECT_API APlayerCharacter : public APaperCharacter
@@ -75,6 +77,8 @@ protected:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	
 
 public:
 	// Sets default values for this character's properties
@@ -173,6 +177,13 @@ public:
 		float GetStaminaRegenerationRate();
 
 private:
+	const static size_t comboCount = 5;
+
+	size_t shotsFired;
+
+	SoundCombo *comboList[comboCount];
+	bool possibleCombos[comboCount];
+
 	FTimerHandle staminaTimer;
 
 	float lastStaminaShot;
@@ -193,6 +204,9 @@ public:
 	void StoptReplenishingStamina();
 
 	void ReplenishStaminaPortion();
+
+	void checkCombo(sound_shot);
+	void resetComboCheck();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void Death();

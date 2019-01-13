@@ -88,6 +88,22 @@ APlayerCharacter::APlayerCharacter()
 
 	staminaReplenishing = false;
 	lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+
+	for (int i = 0; i < genericComboCount; i++)
+	{
+		sound_shot *combo = new sound_shot[5];
+
+		for (int j = 0; j < comboSize; j++)
+		{
+			combo[i] = genericCombos[i][j];
+		}
+
+		comboList[i] = new SoundCombo(comboSize, combo, sound_combo_effect::HEAL);
+	}
+
+	
+
+	resetComboCheck();
 }
 
 // Called every frame
@@ -258,6 +274,8 @@ void APlayerCharacter::FireLow()
 {
 	if (currentStamina >= 5)
 	{
+		checkCombo(sound_shot::LOW);
+
 		if (ShotLow)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotLow);
@@ -272,6 +290,7 @@ void APlayerCharacter::FireLow()
 		}
 
 		Fire(bulletLow);
+		
 	}
 }
 
@@ -279,6 +298,8 @@ void APlayerCharacter::FireMed()
 {
 	if (currentStamina >= 5)
 	{
+		checkCombo(sound_shot::MED);
+
 		if (ShotMed)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotMed);
@@ -300,6 +321,8 @@ void APlayerCharacter::FireHigh()
 {
 	if (currentStamina >= 5)
 	{
+		checkCombo(sound_shot::HIGH);
+
 		if (ShotHigh)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHigh);
@@ -321,6 +344,8 @@ void APlayerCharacter::FireHighest()
 {
 	if (currentStamina >= 10)
 	{
+		checkCombo(sound_shot::HIGHEST);
+
 		if (ShotHighest)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHighest);
@@ -353,6 +378,8 @@ void APlayerCharacter::Fire(TSubclassOf<AActor> b)
 {
 	if (bullet)
 	{
+		shotsFired++;
+
 		FVector loc = CameraBoom->GetComponentLocation();
 		FRotator rot;
 
@@ -402,6 +429,8 @@ bool APlayerCharacter::CheckStamina()
 		if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) - lastStaminaShot > 3)
 		{
 			StartReplenishingStamina();
+			resetComboCheck();
+
 			return true;
 		}
 	}
@@ -446,6 +475,43 @@ void APlayerCharacter::ReplenishStaminaPortion()
 	ChangeCurrentStamina(staminaRegenerationValue);
 }
 
+void APlayerCharacter::checkCombo(sound_shot st)
+{
+	for(size_t i = 0; i < comboCount; i++)
+	{
+		if (possibleCombos[i])
+		{
+			if (comboList[i]->checkCombo(st, shotsFired) == sound_combo_effect::FAILED)
+			{
+				possibleCombos[i] = false;
+
+				return;
+			}
+			else if (comboList[i]->checkCombo(st, shotsFired) != sound_combo_effect::GOOD)
+			{
+				// ADD ITEMS USAGE HERE
+				resetComboCheck();
+
+				return;
+			}
+		}
+	}
+
+	if (shotsFired > comboSize)
+	{
+		resetComboCheck();
+	}
+}
+
+void APlayerCharacter::resetComboCheck()
+{
+	shotsFired = 0;
+	for (size_t i = 0; i < comboCount; i++)
+	{
+		possibleCombos[i] = true;
+	}
+}
+
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Call the base class - this will tell us how much damage to apply
@@ -462,6 +528,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor
 		if (currentHealth <= 0.f)
 		{
+			delete [] comboList;
 			if (Dying)
 			{
 				UGameplayStatics::PlaySound2D(this, Dying);
