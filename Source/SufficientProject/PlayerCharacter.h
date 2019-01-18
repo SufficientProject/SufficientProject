@@ -5,14 +5,16 @@
 #include "CoreMinimal.h"
 #include "Engine.h"
 #include "PaperCharacter.h"
+#include "SoundCombo.h"
 #include "PlayerCharacter.generated.h"
+
 
 UCLASS()
 class SUFFICIENTPROJECT_API APlayerCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -76,6 +78,8 @@ protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+
+
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
@@ -103,7 +107,7 @@ protected:
 		float staminaRegenerationValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stamina)
-		float staminaRegenerationRate; 
+		float staminaRegenerationRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		class USoundBase* Squeaking;
@@ -173,6 +177,26 @@ public:
 		float GetStaminaRegenerationRate();
 
 private:
+
+	sound_shot genericCombos[5][5] =
+	{
+		{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::HIGHEST, sound_shot::HIGH},
+
+		{sound_shot::LOW, sound_shot::HIGH, sound_shot::LOW, sound_shot::HIGH, sound_shot::HIGHEST},
+
+		{sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST, sound_shot::LOW},
+
+		{sound_shot::LOW, sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST},
+
+		{sound_shot::HIGHEST, sound_shot::LOW, sound_shot::LOW, sound_shot::MED, sound_shot::HIGH}
+
+	};
+
+	size_t shotsFired, comboList;
+
+	SoundCombo *comboList;
+	bool *possibleCombos;
+
 	FTimerHandle staminaTimer;
 
 	float lastStaminaShot;
@@ -193,6 +217,10 @@ public:
 	void StoptReplenishingStamina();
 
 	void ReplenishStaminaPortion();
+
+	void checkCombo(sound_shot);
+	void usePowerUp(sound_combo_effect effect);
+	void resetComboCheck();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void Death();
