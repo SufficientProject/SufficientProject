@@ -76,8 +76,8 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 
 	// Set default values for player character
-	currentHealth = 10;
-	maxHealth = 10;
+	currentHealth = 20;
+	maxHealth = 20;
 
 	currentStamina = 100;
 	maxStamina = 100;
@@ -88,6 +88,29 @@ APlayerCharacter::APlayerCharacter()
 
 	staminaReplenishing = false;
 	lastStaminaShot = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+
+	comboCount = 5;
+
+	comboList = new SoundCombo*[comboCount];
+	possibleCombos = new bool[comboCount];
+	sound_shot **genericComboList = new sound_shot*[5];
+
+	for (int i = 0; i < comboCount; i++)
+	{	
+		possibleCombos[i] = true;
+
+		genericComboList[i] = new sound_shot[5];
+
+		for (int j = 0; j < comboCount; j++)
+		{
+			genericComboList[i][j] = genericCombos[i][j];
+		}
+
+		comboList[i] = new SoundCombo(5, genericComboList[i], static_cast<sound_combo_effect>(3 + i));
+	}
+
+	shotsFired = 0;
+	
 }
 
 // Called every frame
@@ -125,7 +148,7 @@ void APlayerCharacter::UpdateAnimation()
 	// Check if moving
 	UPaperFlipbook* DesiredAnimation;
 	if (IsJumping())
-			DesiredAnimation = JumpingAnimation;
+		DesiredAnimation = JumpingAnimation;
 	else
 		(PlayerSpeedSqr > 0.0f) ? DesiredAnimation = RunningAnimation : DesiredAnimation = IdleAnimation;
 
@@ -258,6 +281,9 @@ void APlayerCharacter::FireLow()
 {
 	if (currentStamina >= 5)
 	{
+		shotsFired++;
+		checkCombo(sound_shot::LOW);
+
 		if (ShotLow)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotLow);
@@ -272,6 +298,7 @@ void APlayerCharacter::FireLow()
 		}
 
 		Fire(bulletLow);
+
 	}
 }
 
@@ -279,6 +306,9 @@ void APlayerCharacter::FireMed()
 {
 	if (currentStamina >= 5)
 	{
+		shotsFired++;
+		checkCombo(sound_shot::MED);
+
 		if (ShotMed)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotMed);
@@ -300,6 +330,9 @@ void APlayerCharacter::FireHigh()
 {
 	if (currentStamina >= 5)
 	{
+		shotsFired++;
+		checkCombo(sound_shot::HIGH);
+
 		if (ShotHigh)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHigh);
@@ -321,6 +354,9 @@ void APlayerCharacter::FireHighest()
 {
 	if (currentStamina >= 10)
 	{
+		shotsFired++;
+		checkCombo(sound_shot::HIGHEST);
+
 		if (ShotHighest)
 		{
 			UGameplayStatics::PlaySound2D(this, ShotHighest);
@@ -402,6 +438,7 @@ bool APlayerCharacter::CheckStamina()
 		if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) - lastStaminaShot > 3)
 		{
 			StartReplenishingStamina();
+
 			return true;
 		}
 	}
@@ -418,7 +455,7 @@ bool APlayerCharacter::IsJumping()
 {
 	const FVector PlayerVelocity = GetVelocity();
 
-	if(PlayerVelocity.Z != 0 )
+	if (PlayerVelocity.Z != 0)
 		return true;
 
 	return false;
@@ -428,6 +465,8 @@ void APlayerCharacter::StartReplenishingStamina()
 {
 	staminaReplenishing = true;
 	GetWorld()->GetTimerManager().SetTimer(staminaTimer, this, &APlayerCharacter::ReplenishStaminaPortion, staminaRegenerationRate, true);
+
+	resetComboCheck();
 }
 
 void APlayerCharacter::StoptReplenishingStamina()
@@ -444,6 +483,74 @@ void APlayerCharacter::ReplenishStaminaPortion()
 	}
 
 	ChangeCurrentStamina(staminaRegenerationValue);
+}
+
+void APlayerCharacter::checkCombo(sound_shot st)
+{
+	for (size_t i = 0; i < comboCount; i++)
+	{
+		if (possibleCombos[i] == true)
+		{
+			if (comboList[i]->checkCombo(st, (shotsFired - 1)) == sound_combo_effect::FAILED)
+			{
+				possibleCombos[i] = false;
+			}
+			else if (comboList[i]->checkCombo(st, (shotsFired - 1)) != sound_combo_effect::GOOD)
+			{					
+				usePowerUp(comboList[i]->getEffect());
+				
+				resetComboCheck();
+			}
+		}
+	}
+
+	if (shotsFired >= 5)
+	{
+		resetComboCheck();
+	}
+}
+
+void APlayerCharacter::usePowerUp(sound_combo_effect effect)
+{
+	UGameplayStatics::PlaySound2D(this, Squeaking);
+
+	if (effect == sound_combo_effect::FULLHEAL)
+	{
+		SetCurrentHealth(GetMaxHealth());
+	}
+	else if (effect == sound_combo_effect::HEAL)
+	{
+		SetCurrentHealth(GetCurrentHealth() + (GetMaxHealth() / 5));
+		if (GetCurrentHealth() > GetMaxHealth())
+		{
+			SetCurrentHealth(GetMaxHealth());
+		}
+	}
+	else if (effect == sound_combo_effect::FULLSTAM)
+	{
+		SetCurrentStamina(GetMaxStamina());
+	}
+	else if(effect == sound_combo_effect::STAM)
+	{
+		SetCurrentStamina(GetCurrentStamina() + (GetMaxStamina() / 5));
+		if (GetCurrentStamina() > GetMaxStamina())
+		{
+			SetCurrentStamina(GetMaxStamina());
+		}
+	}
+	else
+	{
+		Fire(bulletHighest);
+	}
+}
+
+void APlayerCharacter::resetComboCheck()
+{
+	shotsFired = 0;
+	for (size_t i = 0; i < comboCount; i++)
+	{
+		possibleCombos[i] = true;
+	}
 }
 
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -489,5 +596,5 @@ void APlayerCharacter::DestroyOverlapped()
 
 void APlayerCharacter::Death_Implementation()
 {
-	
+
 }
