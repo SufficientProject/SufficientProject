@@ -487,7 +487,7 @@ void APlayerCharacter::ReplenishStaminaPortion()
 
 void APlayerCharacter::checkCombo(sound_shot st)
 {
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < comboCount; i++)
 	{
 		if (possibleCombos[i] == true)
 		{
@@ -529,7 +529,6 @@ void APlayerCharacter::usePowerUp(sound_combo_effect effect)
 	else if (effect == sound_combo_effect::FULLSTAM)
 	{
 		SetCurrentStamina(GetMaxStamina());
-		SetCurrentHealth(GetMaxHealth());
 	}
 	else if(effect == sound_combo_effect::STAM)
 	{
@@ -548,7 +547,7 @@ void APlayerCharacter::usePowerUp(sound_combo_effect effect)
 void APlayerCharacter::resetComboCheck()
 {
 	shotsFired = 0;
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < comboCount; i++)
 	{
 		possibleCombos[i] = true;
 	}
