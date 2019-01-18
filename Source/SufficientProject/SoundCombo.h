@@ -1,8 +1,8 @@
 #pragma once
 
-enum class sound_shot : int { LOW, MED, HIGH, HIGHEST };
+enum sound_shot : int { LOW = 101, MED = 102, HIGH = 103, HIGHEST = 104 };
 
-enum class sound_combo_effect : int { FAILED, GOOD, NONE, DMG, HEAL, FULLHEAL };
+enum sound_combo_effect : int { FAILED = 0, GOOD = 1, NONE = 2, STAM = 3, FULLSTAM = 4, HEAL = 5, FULLHEAL = 6, DMG = 7 };
 
 class SoundCombo
 {
@@ -14,7 +14,7 @@ private:
 	sound_combo_effect comboEffect;
 
 public:
-	SoundCombo() : comboSize(0), soundSequence(nullptr), comboEffect(sound_combo_effect::FAILED)
+	SoundCombo() : comboSize(0), soundSequence(nullptr), comboEffect(sound_combo_effect::STAM)
 	{
 
 	}
@@ -33,7 +33,7 @@ public:
 	{
 		if (soundSequence[pos] == st)
 		{
-			if (pos == comboSize)
+			if (pos == comboSize - 1)
 			{
 				return comboEffect;
 			}

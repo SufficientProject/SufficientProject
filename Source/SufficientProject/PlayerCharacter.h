@@ -180,19 +180,20 @@ private:
 
 	sound_shot genericCombos[5][5] =
 	{
-		{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::HIGHEST, sound_shot::HIGH},
+		{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::HIGH},
 
-		{sound_shot::LOW, sound_shot::HIGH, sound_shot::LOW, sound_shot::HIGH, sound_shot::HIGHEST},
+		{sound_shot::LOW, sound_shot::LOW, sound_shot::LOW, sound_shot::MED, sound_shot::MED},
 
-		{sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST, sound_shot::LOW},
+		{sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGH, sound_shot::HIGH},
 
 		{sound_shot::LOW, sound_shot::MED, sound_shot::MED, sound_shot::HIGH, sound_shot::HIGHEST},
 
-		{sound_shot::HIGHEST, sound_shot::LOW, sound_shot::LOW, sound_shot::MED, sound_shot::HIGH}
+		{sound_shot::HIGHEST, sound_shot::HIGHEST, sound_shot::LOW, sound_shot::LOW, sound_shot::LOW}
 
 	};
 
 	size_t shotsFired, comboCount;
+	sound_shot **genericComboList;
 
 	SoundCombo **comboList;
 	bool *possibleCombos;
@@ -219,7 +220,7 @@ public:
 	void ReplenishStaminaPortion();
 
 	void checkCombo(sound_shot);
-	void usePowerUp(sound_combo_effect effect);
+	void usePowerUp(sound_combo_effect);
 	void resetComboCheck();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
