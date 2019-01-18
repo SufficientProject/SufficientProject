@@ -91,11 +91,11 @@ APlayerCharacter::APlayerCharacter()
 
 	comboCount = 5;
 
-	comboList = new SoundCombo[comboCount];
+	comboList = new SoundCombo*[comboCount];
 	possibleCombos = new bool[comboCount];;
 
 	for (int i = 0; i < 5; i++)
-	{
+	{	
 		possibleCombos[i] = true;
 		sound_shot *combo = new sound_shot[5];
 
@@ -105,7 +105,7 @@ APlayerCharacter::APlayerCharacter()
 			combo[i] = genericCombos[i][j];
 		}
 
-		comboList[i] = SoundCombo(5, combo, sound_combo_effect::FULLHEAL);
+		comboList[i] = new SoundCombo(5, combo, sound_combo_effect::FULLHEAL);
 	}
 
 

@@ -14,6 +14,10 @@ private:
 	sound_combo_effect comboEffect;
 
 public:
+	SoundCombo() : comboSize(0), soundSequence(nullptr), comboEffect(sound_combo_effect::FAILED)
+	{
+
+	}
 
 	SoundCombo(size_t st, sound_shot *s, sound_combo_effect se) : comboSize(st), soundSequence(s), comboEffect(se)
 	{

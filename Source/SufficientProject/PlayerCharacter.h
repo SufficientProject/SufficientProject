@@ -192,9 +192,9 @@ private:
 
 	};
 
-	size_t shotsFired, comboList;
+	size_t shotsFired, comboCount;
 
-	SoundCombo *comboList;
+	SoundCombo **comboList;
 	bool *possibleCombos;
 
 	FTimerHandle staminaTimer;
